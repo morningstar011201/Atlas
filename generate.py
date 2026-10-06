@@ -70,8 +70,8 @@ def page(path, title, desc, body, crumbs=(), ld=(), mod=None):
     bc = '<nav class="bc">' + " › ".join(f'<a href="{h}">{e(n)}</a>' for h, n in crumbs) + "</nav>" if crumbs else ""
     robots = '<meta name="robots" content="noindex">' if PREVIEW else ""
     pv = '<p class="pv">Preview build: numbers may be placeholders.</p>' if PREVIEW else ""
-    ads = ("window.loadAds=function(){var s=document.createElement('script');s.async=1;s.crossOrigin='anonymous';s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=%s';document.head.appendChild(s)};" % CFG["adsense_client"]) if CFG["adsense_client"] else ""
-    cf = ('<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon=\'{"token":"%s"}\'></script>' % CFG["cf_token"]) if CFG["cf_token"] else ""
+    gid = CFG["ga_id"]
+    ga = """<script>window.GA_ID="%s";try{if(localStorage.getItem('consent')==='no')window['ga-disable-%s']=true}catch(e){}</script><script async src="https://www.googletagmanager.com/gtag/js?id=%s"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','%s');</script>""" % (gid, gid, gid, gid) if gid else ""
     nav = " · ".join(f'<a href="/us/{t}/">{n}</a>' for t, n in T.items() if type_live(t))
     mod = mod or str(date.today()); img = BASE + "/assets/og.png"
     graph = [{"@type": "Organization", "name": "Atlas by RapidTool", "url": BASE + "/"}]
@@ -83,10 +83,10 @@ def page(path, title, desc, body, crumbs=(), ld=(), mod=None):
 <meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(desc)}"><meta property="og:url" content="{BASE}{path}"><meta property="og:type" content="website"><meta property="og:image" content="{img}">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{e(title)}"><meta name="twitter:description" content="{e(desc)}"><meta name="twitter:image" content="{img}">
 <meta property="article:modified_time" content="{mod}"><script type="application/ld+json">{jl}</script>
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/assets/apple-touch-icon.png"><link rel="manifest" href="/assets/site.webmanifest"><meta name="theme-color" content="#faf8f4"><link rel="stylesheet" href="/assets/style.css"><script>{ads}</script>{cf}</head><body>
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/assets/apple-touch-icon.png"><link rel="manifest" href="/assets/site.webmanifest"><meta name="theme-color" content="#faf8f4"><link rel="stylesheet" href="/assets/style.css">{ga}</head><body>
 <header><a class="logo" href="/">{LOGO}Atlas</a><span>{nav}</span></header><main>{bc}{pv}{body}</main>
 <footer><a href="/us/">All US states</a> · <a href="/about/">About</a> · <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a> · <a href="/disclaimer/">Disclaimer</a></footer>
-<div id="cb" class="cb"><span>We use cookies for analytics and ads. See our <a href="/privacy/">privacy policy</a>.</span><button data-c="yes">Accept</button><button data-c="no">Decline</button></div>
+<div id="cb" class="cb"><span>We use cookies for analytics. See our <a href="/privacy/">privacy policy</a>.</span><button data-c="yes">Accept</button><button data-c="no">Decline</button></div>
 <script src="/assets/app.js" defer></script></body></html>"""
 
 def links(t, s):
@@ -213,9 +213,9 @@ def hubs():
 
 LEGAL = {
  "privacy": ("Privacy Policy", ["Atlas does not ask for accounts or personal information. Numbers you type into the calculators stay in your browser.",
-   "This site may use cookies for visit counts and for ads shown by third parties such as Google. Third-party vendors, including Google, use cookies to serve ads based on a visitor's earlier visits to this and other websites. You can opt out of personalized advertising at <a href=\"https://adssettings.google.com\">adssettings.google.com</a> or <a href=\"https://www.aboutads.info\">aboutads.info</a>.",
+   "This site uses Google Analytics to count visits and see which pages are viewed. It uses cookies for this.",
    "You can decline cookies with the banner on the site. This site is not directed at children under 13.",
-   "Last updated October 5, 2026."]),
+   "Last updated October 6, 2026."]),
  "terms": ("Terms of Use", ["Atlas gives general information and estimates. Use it at your own risk.",
    "Data comes from third-party sources and may be out of date or contain errors. The site is provided as is, without warranties. These terms may change at any time."]),
  "disclaimer": ("Disclaimer", ["Atlas is not financial, tax, insurance or legal advice. Results are estimates based on public data and simplified assumptions, such as a single filer using the standard deduction.",
@@ -244,6 +244,7 @@ def main():
         d = rel.parent.as_posix(); u = ("/" if d == "." else f"/{d}/") if rel.name == "index.html" else f"/{rel.as_posix()}"
         if "noindex" not in txt and u not in urls and rel.name != "404.html": urls.append(u)
     (OUT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + "".join(f"<url><loc>{BASE}{p}</loc>" + (f"<lastmod>{LM[p]}</lastmod>" if p in LM else "") + "</url>" for p in urls) + "</urlset>")
+    (OUT / f"{CFG['indexnow_key']}.txt").write_text(CFG["indexnow_key"])
     BOTS = ["GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-SearchBot", "Claude-User", "anthropic-ai", "PerplexityBot", "Perplexity-User", "Google-Extended", "Applebot-Extended", "CCBot", "Amazonbot", "Googlebot", "Bingbot"]
     (OUT / "robots.txt").write_text("User-agent: *\nDisallow: /\n" if PREVIEW else "".join(f"User-agent: {b}\nAllow: /\n\n" for b in BOTS) + f"User-agent: *\nAllow: /\n\nSitemap: {BASE}/sitemap.xml\n")
     fact = {"paycheck-calculator": lambda s: f"take-home on $60,000 about {money(net(S[s], 60000))} per year",
@@ -273,8 +274,6 @@ def main():
     cnt = {t: sum(live(t, s) for s in S) for t in T}
     print(f"{len(PAGES)} pages built {'(preview)' if PREVIEW else ''}; state pages live: {cnt}; broken internal links: {len(bad)}")
     for b in bad[:10]: print("  BROKEN", b)
-    for k in ("adsense_client", "cf_token"):
-        if not CFG[k]: print(f"  NOTE: set '{k}' in data/national.json")
     if bad: sys.exit(1)
 
 main()

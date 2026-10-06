@@ -1,7 +1,7 @@
 (function(){var b=document.getElementById('cb'),$=function(i){return document.getElementById(i)};
-function ld(){window.loadAds&&window.loadAds()}
-try{var c=localStorage.getItem('consent');if(c){b.hidden=true;if(c==='yes')ld()}}catch(x){}
-[].forEach.call(document.querySelectorAll('[data-c]'),function(x){x.onclick=function(){try{localStorage.setItem('consent',x.dataset.c)}catch(y){}b.hidden=true;if(x.dataset.c==='yes')ld()}});
+function off(){if(window.GA_ID)window['ga-disable-'+window.GA_ID]=true}
+try{if(localStorage.getItem('consent'))b.hidden=true}catch(x){}
+[].forEach.call(document.querySelectorAll('[data-c]'),function(x){x.onclick=function(){try{localStorage.setItem('consent',x.dataset.c)}catch(y){}b.hidden=true;if(x.dataset.c==='no')off()}});
 var el=$('dt'),f=$('f');if(!el||!f)return;var D=JSON.parse(el.textContent);
 var usd=function(n){return '$'+Math.round(n).toLocaleString('en-US')},v=function(i){return Math.max(0,+$(i).value||0)};
 function tax(b,inc){var t=0;for(var i=0;i<b.length;i++){var hi=i+1<b.length?b[i+1][0]:Infinity;if(inc>b[i][0])t+=(Math.min(inc,hi)-b[i][0])*b[i][1]/100}return t}
