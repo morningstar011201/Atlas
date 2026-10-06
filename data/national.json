@@ -1,0 +1,45 @@
+{
+ "base_url": "https://atlas.rapidtool.online",
+ "adsense_client": "",
+ "cf_token": "",
+ "federal": {
+  "verified": true,
+  "year": 2026,
+  "std_deduction": 16100,
+  "ss_base": 184500,
+  "brackets": [
+   [
+    0,
+    10
+   ],
+   [
+    12400,
+    12
+   ],
+   [
+    50400,
+    22
+   ],
+   [
+    105700,
+    24
+   ],
+   [
+    201775,
+    32
+   ],
+   [
+    256225,
+    35
+   ],
+   [
+    640600,
+    37
+   ]
+  ]
+ },
+ "mortgage_rate": 7.28,
+ "mortgage_rate_date": "October 1, 2026",
+ "mortgage_rate_source": "Freddie Mac Primary Mortgage Market Survey",
+ "auto_national_avg": 1438.6
+}
