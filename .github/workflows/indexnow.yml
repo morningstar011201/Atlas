@@ -1,0 +1,36 @@
+name: IndexNow
+
+on:
+  push:
+    branches: [main, master]
+    paths: ["data/**", "pages/**", "static/**", "generate.py"]
+  workflow_dispatch:
+    inputs:
+      all:
+        description: "Submit every page"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Submit new and changed pages
+        env:
+          BEFORE: ${{ github.event.before }}
+          ALL: ${{ inputs.all }}
+        run: |
+          if [ "$ALL" = "true" ] || [ -z "$BEFORE" ]; then
+            python3 indexnow.py --all
+          else
+            python3 indexnow.py --before "$BEFORE"
+          fi
